@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 
+final someProvider = Provider((ref) => 'Something');
+
 void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
@@ -44,6 +46,7 @@ class MyHomePage extends HookConsumerWidget {
               )
             else
               ProviderScope(
+                disposeDelay: const Duration(milliseconds: 100),
                 overrides: [
                   someProvider.overrideWithValue('Something else'),
                 ],
@@ -70,8 +73,6 @@ class OverlayContainer extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final link = useRef(LayerLink());
     useEffect(() {
-      var inserted = false;
-      var disposed = false;
       final overlay = OverlayEntry(builder: (c) {
         return ProviderScope(
           parent: ProviderScope.containerOf(context),
@@ -88,19 +89,13 @@ class OverlayContainer extends HookConsumerWidget {
         );
       });
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-        if (!disposed) {
-          print('Inserting');
-          Overlay.of(context).insert(overlay);
-          inserted = true;
-        }
+        print('Inserting');
+        Overlay.of(context).insert(overlay);
       });
       return () {
-        if (inserted) {
-          print('Removing overlay');
-          overlay.remove();
-          overlay.dispose();
-        }
-        disposed = true;
+        print('Removing overlay');
+        overlay.remove();
+        overlay.dispose();
       };
     }, []);
     return CompositedTransformTarget(
@@ -120,5 +115,3 @@ class Hint extends ConsumerWidget {
     return Card(child: Text(text));
   }
 }
-
-final someProvider = Provider((ref) => 'Something');
