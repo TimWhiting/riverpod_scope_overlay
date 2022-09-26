@@ -46,7 +46,6 @@ class MyHomePage extends HookConsumerWidget {
               )
             else
               ProviderScope(
-                disposeDelay: const Duration(milliseconds: 100),
                 overrides: [
                   someProvider.overrideWithValue('Something else'),
                 ],
